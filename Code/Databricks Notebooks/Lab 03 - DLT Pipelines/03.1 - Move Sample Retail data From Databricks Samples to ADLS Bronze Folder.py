@@ -26,8 +26,8 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-studentName = 'richjohn'
-storageName = 'stgliadadls'
+studentName = 'dliad'
+storageName = 'stadlstibrown'
 
 bronzePath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/bronze"
 silverPath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/silver"
@@ -46,11 +46,18 @@ configs = {
   "fs.azure.account.custom.token.provider.class": spark.conf.get("spark.databricks.passthrough.adls.gen2.tokenProviderClassName")
 }
 
-# Optionally, you can add <directory-name> to the source URI of your mount point.
-dbutils.fs.mount(
-  source = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/",
-  mount_point = f"/mnt/{studentName}lakehouse",
-  extra_configs = configs)
+str_path = f"/mnt/{studentName}lakehouse"
+
+if any(mount.mountPoint == str_path for mount in dbutils.fs.mounts()):
+    #dbutils.fs.unmount(str_path)
+    print( "The mountpoint already exists" )
+else:
+    print( "Mounting... " )
+    # Optionally, you can add <directory-name> to the source URI of your mount point.
+    dbutils.fs.mount(
+    source = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/",
+    mount_point = f"/mnt/{studentName}lakehouse",
+    extra_configs = configs)
 
 #if it exists then drop with following command
 #dbutils.fs.unmount(f"/mnt/{studentName}lakehouse")  
@@ -79,7 +86,7 @@ dbutils.fs.ls(bronzePath)
 # COMMAND ----------
 
 #remove files and folder if exists
-dbutils.fs.rm(bronzePath)
+dbutils.fs.rm(bronzePath, True)
 
 #Add bronze folder
 dbutils.fs.mkdirs(bronzePath)
