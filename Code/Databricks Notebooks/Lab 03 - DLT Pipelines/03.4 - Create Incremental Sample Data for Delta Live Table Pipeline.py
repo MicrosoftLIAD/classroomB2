@@ -10,7 +10,7 @@
 # COMMAND ----------
 
 # DBTITLE 1,Define our classroom student variables again
-setup_responses = dbutils.notebook.run("./utils/Get-Metadata", 0).split()
+setup_responses = dbutils.notebook.run("../utils/Get-Metadata", 0).split()
 
 local_data_path = setup_responses[0]
 dbfs_data_path = setup_responses[1]
@@ -26,8 +26,8 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-studentName = 'richjohn'
-storageName = 'stgliadadls'
+studentName = 'dliad'
+storageName = 'stadlstibrown'
 
 
 bronzePath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/bronze"
