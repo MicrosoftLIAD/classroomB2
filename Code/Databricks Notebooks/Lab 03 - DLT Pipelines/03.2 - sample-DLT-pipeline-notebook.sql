@@ -6,10 +6,11 @@
 
 -- COMMAND ----------
 
+--Replace /mnt definition below by replacing it with your credential name.   i.e. change richjohn to your credential name
 CREATE STREAMING LIVE TABLE customers
 COMMENT "The customers buying finished products, ingested from /databricks-datasets."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "mapping")
-AS SELECT * FROM cloud_files("/databricks-datasets/retail-org/customers/", "csv");
+AS SELECT * FROM cloud_files("/mnt/richjohnlakehouse/bronze/customers/", "csv");
 
 -- COMMAND ----------
 
@@ -17,16 +18,19 @@ CREATE STREAMING LIVE TABLE sales_orders_raw
 COMMENT "The raw sales orders, ingested from /databricks-datasets."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "bronze")
 AS
-SELECT * FROM cloud_files("/databricks-datasets/retail-org/sales_orders/", "json", map("cloudFiles.inferColumnTypes", "true"))
+SELECT * FROM cloud_files("/mnt/richjohnlakehouse/bronze/sales_orders/*.json", "json", map("cloudFiles.inferColumnTypes", "true"))
 
 -- COMMAND ----------
 
 CREATE STREAMING LIVE TABLE sales_orders_cleaned(
   CONSTRAINT valid_order_number EXPECT (order_number IS NOT NULL) ON VIOLATION DROP ROW
 )
+
 PARTITIONED BY (order_date)
+
 COMMENT "The cleaned sales orders with valid order_number(s) and partitioned by order_datetime."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "silver")
+
 AS
 SELECT f.customer_id, f.customer_name, f.number_of_line_items, 
   TIMESTAMP(from_unixtime((cast(f.order_datetime as long)))) as order_datetime, 
@@ -42,6 +46,7 @@ SELECT f.customer_id, f.customer_name, f.number_of_line_items,
 CREATE LIVE TABLE sales_order_in_la
 COMMENT "Sales orders in LA."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "gold")
+
 AS
 SELECT city, order_date, customer_id, customer_name, ordered_products_explode.curr, SUM(ordered_products_explode.price) as sales, SUM(ordered_products_explode.qty) as quantity, COUNT(ordered_products_explode.id) as product_count
 FROM (
@@ -56,6 +61,7 @@ GROUP BY order_date, city, customer_id, customer_name, ordered_products_explode.
 CREATE LIVE TABLE sales_order_in_chicago
 COMMENT "Sales orders in Chicago."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "gold")
+
 AS
 SELECT city, order_date, customer_id, customer_name, ordered_products_explode.curr, SUM(ordered_products_explode.price) as sales, SUM(ordered_products_explode.qty) as quantity, COUNT(ordered_products_explode.id) as product_count
 FROM (

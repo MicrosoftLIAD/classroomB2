@@ -26,8 +26,8 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-studentName = 'instructorrj'
-storageName = 'classadlsg2'
+studentName = 'richjohn'
+storageName = 'stgliadadls'
 
 
 bronzePath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/bronze"
