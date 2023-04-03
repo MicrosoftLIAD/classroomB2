@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC #Move Databricks Sample Retail data to Azure Data Lake Store (ADLS) Bronze Folder
+# MAGIC #Move Databricks Sample Retail data to Managed Bronze Folder
 
 # COMMAND ----------
 
@@ -26,63 +26,48 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-studentName = 'richjohn'
-storageName = 'stgliadadls'
+dbutils.fs.rm(f'{local_data_path}/bronze',True)
+dbutils.fs.rm(f'{local_data_path}/silver',True)
+dbutils.fs.rm(f'{local_data_path}/gold',True)
+dbutils.fs.rm(f'{local_data_path}/_checkpoints',True)
+dbutils.fs.rm(f'{local_data_path}/_schema',True)
 
-bronzePath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/bronze"
-silverPath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/silver"
-goldPath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/gold"
-miscPath = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/misc"
+
+# COMMAND ----------
+
+
+dbutils.fs.mkdirs(f'{local_data_path}/bronze')
+dbutils.fs.mkdirs(f'{local_data_path}/silver')
+dbutils.fs.mkdirs(f'{local_data_path}/gold')
+dbutils.fs.mkdirs(f'{local_data_path}/_checkpoints')
+dbutils.fs.mkdirs(f'{local_data_path}/_schema')
+
+
+
+
+# COMMAND ----------
+
+display(dbutils.fs.ls(dbfs_data_path))
+
+# COMMAND ----------
+
+display(dbutils.fs.ls(local_data_path))
+
+# COMMAND ----------
+
+
+bronzePath = f"{local_data_path}bronze"
+silverPath = f"{local_data_path}silver"
+goldPath = f"{local_data_path}gold"
+
 print(bronzePath)
 print(silverPath)
 print(goldPath)
-print(miscPath)
 
-# COMMAND ----------
-
-#create a mountpoint for the path to be used for delta live table path location to your individual container per each student
-configs = {
-  "fs.azure.account.auth.type": "CustomAccessToken",
-  "fs.azure.account.custom.token.provider.class": spark.conf.get("spark.databricks.passthrough.adls.gen2.tokenProviderClassName")
-}
-
-# Optionally, you can add <directory-name> to the source URI of your mount point.
-dbutils.fs.mount(
-  source = f"abfss://{studentName}@{storageName}.dfs.core.windows.net/",
-  mount_point = f"/mnt/{studentName}lakehouse",
-  extra_configs = configs)
-
-#if it exists then drop with following command
-#dbutils.fs.unmount(f"/mnt/{studentName}lakehouse")  
-
-
-# COMMAND ----------
-
-#list mount points
-dbutils.fs.mounts()
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ##Erase and recreate Bronze folder in ADLS to make sure no leftover data
 
 # COMMAND ----------
 
 dbutils.fs.ls(bronzePath)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ##Delete and Recreate Bronze Folder in ADLS
-# MAGIC We want to start with an empty bronze folder for this lab
-
-# COMMAND ----------
-
-#remove files and folder if exists
-dbutils.fs.rm(bronzePath)
-
-#Add bronze folder
-dbutils.fs.mkdirs(bronzePath)
 
 # COMMAND ----------
 
@@ -111,6 +96,10 @@ dbutils.fs.ls(f"{bronzePath}/customers")
 
 # COMMAND ----------
 
+display(dbutils.fs.ls(f"{bronzePath}/customers"))
+
+# COMMAND ----------
+
 # copy the Customers source data into the bronze folder
 dbutils.fs.cp ("/databricks-datasets/retail-org/sales_orders/", f"{bronzePath}/sales_orders/", True) 
 
@@ -123,4 +112,4 @@ display(dbutils.fs.ls(f"{bronzePath}/sales_orders"))
 # MAGIC #Ready to Start Delta Live Tables Pipeline
 # MAGIC At this point, we have data in our bronze folder and can now execute the 03.2 - sample-DLT-pipeline-notebook within a delta live table pipeline.
 # MAGIC 
-# MAGIC This entails creating a pipeline and point to this notebook for execution.
+# MAGIC This entails creating a pipeline and point the pipeline to this notebook for execution.

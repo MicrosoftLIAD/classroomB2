@@ -3,6 +3,14 @@
 -- MAGIC # This is a Sample Delta Live Table Pipeline Notebook
 -- MAGIC    It runs as a triggered or scheduled pipeline under the workflow tab.   
 -- MAGIC    You can only check syntax in this notebook and it must run under a pipeline.
+-- MAGIC    
+-- MAGIC CREATE TABLE sales_orders_raw
+-- MAGIC USING JSON
+-- MAGIC OPTIONS(path "/databricks-datasets/retail-org/sales_orders/");
+-- MAGIC 
+-- MAGIC CREATE TABLE sales_orders_raw
+-- MAGIC USING JSON
+-- MAGIC OPTIONS(path "/dbfs/FileStore/richjohn/deltademoasset/bronze/sales_orders/");
 
 -- COMMAND ----------
 
@@ -10,7 +18,7 @@
 CREATE STREAMING LIVE TABLE customers
 COMMENT "The customers buying finished products, ingested from /databricks-datasets."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "mapping")
-AS SELECT * FROM cloud_files("/mnt/richjohnlakehouse/bronze/customers/", "csv");
+AS SELECT * FROM cloud_files("/dbfs/FileStore/richjohn/deltademoasset/bronze/customers/", "csv");
 
 -- COMMAND ----------
 
@@ -18,7 +26,7 @@ CREATE STREAMING LIVE TABLE sales_orders_raw
 COMMENT "The raw sales orders, ingested from /databricks-datasets."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "bronze")
 AS
-SELECT * FROM cloud_files("/mnt/richjohnlakehouse/bronze/sales_orders/*.json", "json", map("cloudFiles.inferColumnTypes", "true"))
+SELECT * FROM cloud_files("/dbfs/FileStore/richjohn/deltademoasset/bronze/sales_orders/", "json", map("cloudFiles.inferColumnTypes", "true"))
 
 -- COMMAND ----------
 
