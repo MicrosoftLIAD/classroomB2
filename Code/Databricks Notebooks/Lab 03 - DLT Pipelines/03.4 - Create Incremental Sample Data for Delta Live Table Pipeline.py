@@ -26,7 +26,6 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-
 bronzePath = f"{local_data_path}bronze"
 silverPath = f"{local_data_path}silver"
 goldPath = f"{local_data_path}gold"

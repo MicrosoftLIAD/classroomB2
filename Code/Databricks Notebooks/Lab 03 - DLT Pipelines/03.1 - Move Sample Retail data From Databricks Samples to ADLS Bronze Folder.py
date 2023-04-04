@@ -26,27 +26,6 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-dbutils.fs.rm(f'{local_data_path}/bronze',True)
-dbutils.fs.rm(f'{local_data_path}/silver',True)
-dbutils.fs.rm(f'{local_data_path}/gold',True)
-dbutils.fs.rm(f'{local_data_path}/_checkpoints',True)
-dbutils.fs.rm(f'{local_data_path}/_schema',True)
-
-
-# COMMAND ----------
-
-
-dbutils.fs.mkdirs(f'{local_data_path}/bronze')
-dbutils.fs.mkdirs(f'{local_data_path}/silver')
-dbutils.fs.mkdirs(f'{local_data_path}/gold')
-dbutils.fs.mkdirs(f'{local_data_path}/_checkpoints')
-dbutils.fs.mkdirs(f'{local_data_path}/_schema')
-
-
-
-
-# COMMAND ----------
-
 display(dbutils.fs.ls(dbfs_data_path))
 
 # COMMAND ----------
@@ -64,8 +43,6 @@ print(bronzePath)
 print(silverPath)
 print(goldPath)
 
-
-# COMMAND ----------
 
 dbutils.fs.ls(bronzePath)
 
