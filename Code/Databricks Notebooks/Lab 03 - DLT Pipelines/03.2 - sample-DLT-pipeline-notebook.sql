@@ -15,7 +15,7 @@
 -- COMMAND ----------
 
 -- MAGIC %md
--- MAGIC In cells 3 and 4 replace the username with your username.   Refer to 03.1 notebook cell #3 for created paths
+-- MAGIC In cells 3 and 4 replace the YOUR_USER_NAME_HERE with your username.   Refer to 03.1 notebook cell #3 for created paths
 
 -- COMMAND ----------
 
@@ -23,7 +23,7 @@
 CREATE STREAMING LIVE TABLE customers
 COMMENT "The customers buying finished products, ingested from /databricks-datasets."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "mapping")
-AS SELECT * FROM cloud_files("/dbfs/FileStore/richjohn/deltademoasset/bronze/customers/", "csv");
+AS SELECT * FROM cloud_files("/dbfs/FileStore/<YOUR_USER_NAME_HERE>/deltademoasset/bronze/customers/", "csv");
 
 -- COMMAND ----------
 
@@ -31,7 +31,7 @@ CREATE STREAMING LIVE TABLE sales_orders_raw
 COMMENT "The raw sales orders, ingested from /databricks-datasets."
 TBLPROPERTIES ("myCompanyPipeline.quality" = "bronze")
 AS
-SELECT * FROM cloud_files("/dbfs/FileStore/richjohn/deltademoasset/bronze/sales_orders/", "json", map("cloudFiles.inferColumnTypes", "true"))
+SELECT * FROM cloud_files("/dbfs/FileStore/<YOUR_USER_NAME_HERE>/deltademoasset/bronze/sales_orders/", "json", map("cloudFiles.inferColumnTypes", "true"))
 
 -- COMMAND ----------
 
