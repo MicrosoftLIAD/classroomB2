@@ -198,7 +198,8 @@ df.createOrReplaceTempView("stores_csv_file")
 # COMMAND ----------
 
 # DBTITLE 1,Notice the _delta_log/ folder unders stores.  Its contains the JSON log file info that tracks versions.
-# MAGIC %fs ls dbfs:/user/hive/warehouse/richjohn_dliad_db_delta.db/stores/
+dbutils.fs.ls( f"dbfs:/user/hive/warehouse/{DeltaDataSchema}.db/stores/" )
+
 
 # COMMAND ----------
 

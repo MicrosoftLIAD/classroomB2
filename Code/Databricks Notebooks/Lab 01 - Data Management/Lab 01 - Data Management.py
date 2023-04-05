@@ -63,8 +63,8 @@ print(f"Database name is {database_name}")
 # COMMAND ----------
 
 # DBTITLE 1,Update these variables
-studentName = 'richjohn'
-storageName = 'stgliadadls'
+studentName = 'dliad'
+storageName = 'stadlstibrown'
 
 
 # COMMAND ----------
