@@ -26,7 +26,23 @@ print(f"Database name is {database_name}")
 
 # COMMAND ----------
 
-display(dbutils.fs.ls(dbfs_data_path))
+# MAGIC %md
+# MAGIC ##Create user specific medallion folders
+# MAGIC We want to create user specific folders in DBFS for bronze, silver and Gold folders
+
+# COMMAND ----------
+
+#Remove old folders and data if they exist
+dbutils.fs.rm(f"{local_data_path}/bronze",True)
+dbutils.fs.rm(f"{local_data_path}/silver",True)
+dbutils.fs.rm(f"{local_data_path}/gold",True)
+
+# COMMAND ----------
+
+dbutils.fs.mkdirs(f"{local_data_path}/bronze")
+dbutils.fs.mkdirs(f"{local_data_path}/silver")
+dbutils.fs.mkdirs(f"{local_data_path}/gold")
+
 
 # COMMAND ----------
 
@@ -44,35 +60,21 @@ print(silverPath)
 print(goldPath)
 
 
-dbutils.fs.ls(bronzePath)
-
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##dbutils Commands
-# MAGIC These commands are great for moving files around from Databricks managed folders to Azure Data Lake Store folders.
-# MAGIC 
-# MAGIC You can create folders (mkdirs), remove folders (rm), list contents of folders (ls) and copy files to/from folders (cp)
-
-# COMMAND ----------
-
-dbutils.fs.help()
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ##Now Copy databricks sample retail data to Bronze folder in ADLS
+# MAGIC ##Now Copy Databricks databricks-datasets sample retail data to Bronze folder in DBFS
 
 # COMMAND ----------
 
 # copy the Customers source data into the bronze folder
 dbutils.fs.cp ("/databricks-datasets/retail-org/customers/", f"{bronzePath}/customers/", True) 
 
-# confirm the file is where it should be
-dbutils.fs.ls(f"{bronzePath}/customers")
+
 
 # COMMAND ----------
 
+#confirm the Customers sample dataset is your your user specific folder
 display(dbutils.fs.ls(f"{bronzePath}/customers"))
 
 # COMMAND ----------
@@ -88,5 +90,3 @@ display(dbutils.fs.ls(f"{bronzePath}/sales_orders"))
 # MAGIC %md
 # MAGIC #Ready to Start Delta Live Tables Pipeline
 # MAGIC At this point, we have data in our bronze folder and can now execute the 03.2 - sample-DLT-pipeline-notebook within a delta live table pipeline.
-# MAGIC 
-# MAGIC This entails creating a pipeline and point the pipeline to this notebook for execution.

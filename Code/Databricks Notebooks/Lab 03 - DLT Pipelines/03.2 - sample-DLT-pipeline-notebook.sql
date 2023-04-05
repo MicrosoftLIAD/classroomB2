@@ -1,7 +1,7 @@
 -- Databricks notebook source
 -- MAGIC %md
 -- MAGIC # This is a Sample Delta Live Table Pipeline Notebook
--- MAGIC    It runs as a triggered or scheduled pipeline under the workflow tab.   
+-- MAGIC    It runs as a triggered or continuously running pipeline under the workflows tab.   
 -- MAGIC    You can only check syntax in this notebook and it must run under a pipeline.
 -- MAGIC    
 -- MAGIC CREATE TABLE sales_orders_raw
@@ -11,6 +11,11 @@
 -- MAGIC CREATE TABLE sales_orders_raw
 -- MAGIC USING JSON
 -- MAGIC OPTIONS(path "/dbfs/FileStore/richjohn/deltademoasset/bronze/sales_orders/");
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC In cells 3 and 4 replace the username with your username.   Refer to 03.1 notebook cell #3 for created paths
 
 -- COMMAND ----------
 
@@ -78,3 +83,20 @@ FROM (
   WHERE city = 'Chicago'
   )
 GROUP BY order_date, city, customer_id, customer_name, ordered_products_explode.curr
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC Next go to workflows tab on left and create a pipeline that references this notebook
+-- MAGIC 
+-- MAGIC 1 Create a pipeline pointing to this notebook
+-- MAGIC 
+-- MAGIC 2 Enter a unique database schema for the pipeline with your name/credential
+-- MAGIC 
+-- MAGIC 3 Create a fixed szie cluster and set workers to zero (this will creae a singlenode cluser)
+-- MAGIC 
+-- MAGIC 4 Set the pipeline mode to "continuous"
+-- MAGIC 
+-- MAGIC 5 run the pipeline
+-- MAGIC 
+-- MAGIC 6 After pipeline is running go to notebook 03.4 to create some sample data and write new files to bronze folder.   This will demonstrate autoloader appending new data in a continuous manner.

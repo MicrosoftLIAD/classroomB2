@@ -5,11 +5,21 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ##Create some sample sales data for delta live tables
+# MAGIC Make sure you change schema name in next cell to match schema you named when creating the pipeline
 
 # COMMAND ----------
 
-# DBTITLE 1,Define our classroom student variables again
+# MAGIC %sql 
+# MAGIC -- Check on how many rows already added
+# MAGIC select count(*) from myrjdbschema.sales_orders_cleaned;
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##Define are user specific variables again 
+
+# COMMAND ----------
+
 setup_responses = dbutils.notebook.run("../utils/Get-Metadata", 0).split()
 
 local_data_path = setup_responses[0]
@@ -40,6 +50,11 @@ display(dbutils.fs.ls(bronzePath + "/sales_orders"))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ##Create a new schema and table that we will use to gather sample data
+
+# COMMAND ----------
+
 # MAGIC %python
 # MAGIC SalesDataSchema = f"{database_name}_Sales"
 # MAGIC 
@@ -66,12 +81,30 @@ display(dbutils.fs.ls(bronzePath + "/sales_orders"))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC Now select a few rows, set at "limit 3" in next cell into a dataframe
+
+# COMMAND ----------
+
 sales_df = spark.sql("SELECT f.customer_id, f.customer_name, f.number_of_line_items,   TIMESTAMP(from_unixtime((cast(f.order_datetime as long)))) as order_datetime,   DATE(from_unixtime((cast(f.order_datetime as long)))) as order_date,   CAST(f.order_number as long) as order_number, f.ordered_products FROM sales_orders_raw f limit 3")
                      
 display(sales_df)
 
 sales_df.createOrReplaceTempView("sampledata")
 
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ##Set order_date to current_date and randomize to the order number
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Write sample incremental Data to Bronze Sales folde
+# MAGIC Repeat cells 16 through 17 to add new files to the bronze sales folder and watch sales_orders_cleaned table grow from the DLT pipeline
+# MAGIC 
+# MAGIC (Note, in this scenario we're appending to the sales_orders_cleaned table and NOT doing a merge or upsert)
 
 # COMMAND ----------
 
@@ -88,9 +121,7 @@ random_file_number = random.randrange(999999)
 sales_df = sales_df.withColumn("order_date", current_date())
 sales_df = sales_df.withColumn("order_number",col("order_number") + random_order_number)
 
-
 display(sales_df)
-
 
 #print(random_file_number)
 
@@ -98,20 +129,10 @@ display(sales_df)
 
 # COMMAND ----------
 
-#next steps:
-#  copy sales dataset from databricks samples to misc folder in container for each student by reading to df and
-#  writing df to the misc folder.
-#  run the previous few cells and random generator to write new file to the misc foldr which will use autoloader
-#  for the sales dlt pipeline.    View Results in Power BI refresh.
-#  use autoloader queries to see the execution run!!!
-#  Time travel!!
+# write the new file in the bronze sales_orders folder to watch autoload and the DLT pipeline pickup this new data
 
-#display(dbutils.fs.ls(bronzePath + "/sales_orders"))
-
-#print(f"{bronzePath}/sales_orders/sales{random_file_number}.json")
-
-#sales_df.write.json(f"{bronzePath}/sales_orders/sales{random_file_number}.json")
-sales_df.write.json(f"{bronzePath}/sales_orders/salesRICH999.json")
+sales_df.write.json(f"{bronzePath}/sales_orders/sales{random_file_number}")
+#sales_df.write.json(f"{bronzePath}/sales_orders/salesRICH999.json")
 
 
 # COMMAND ----------
@@ -122,8 +143,32 @@ display(dbutils.fs.ls(bronzePath + "/sales_orders"))
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select count(*) from rjsalesdb04032023.sales_orders_cleaned version as of 5;
+# MAGIC SELECT COUNT(*) FROM myrjdbschema.sales_orders_cleaned VERSION AS OF 5;
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC DESCRIBE HISTORY myrjdbschema.sales_orders_cleaned;
 
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #Further Reading on Change Data Capture (CDC) and Upsert or Merge
+# MAGIC 
+# MAGIC [Change Data Capture](https://docs.databricks.com/delta-live-tables/cdc.html#requirements&language-sql)
+# MAGIC 
+# MAGIC [Simplifying Change Data Capture with DLT](https://www.databricks.com/blog/2022/04/25/simplifying-change-data-capture-with-databricks-delta-live-tables.html#:~:text=Earlier%20CDC%20solutions%20with%20delta%20tables%20were%20using,the%20same%20rows%20of%20the%20target%20Delta%20table.)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #Schema Evolution
+# MAGIC 
+# MAGIC By including the mergeSchema option in your query, any columns that are present in the DataFrame but not in the target table are 
+# MAGIC automatically added on to the end of the schema as part of a write transaction. Nested fields can also be added, and these fields 
+# MAGIC will get added to the end of their respective struct columns as well.
+# MAGIC 
+# MAGIC Data engineers and scientists can use this option to add new columns (perhaps a newly tracked metric, or a column of this month’s sales figures) 
+# MAGIC to their existing machine learning production tables without breaking existing models that rely on the old columns.
+# MAGIC 
+# MAGIC [Schema Evolution](https://www.databricks.com/blog/2019/09/24/diving-into-delta-lake-schema-enforcement-evolution.html)
