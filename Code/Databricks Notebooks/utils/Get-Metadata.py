@@ -31,6 +31,6 @@ local_data_path = f"/dbfs/FileStore/{username}/deltademoasset/"
 
 # Return to the caller, passing the variables needed for file paths and database
 
-response = local_data_path + " " + base_table_path + " " + database_name
+response = local_data_path + " " + base_table_path + " " + database_name + " " + username
 
 dbutils.notebook.exit(response)

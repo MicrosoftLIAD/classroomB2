@@ -15,10 +15,12 @@ setup_responses = dbutils.notebook.run("../utils/Get-Metadata", 0).split()
 local_data_path = setup_responses[0]
 dbfs_data_path = setup_responses[1]
 database_name = setup_responses[2]
+user_name = setup_responses[3]
 
 print(f"Local data path is {local_data_path}")
 print(f"DBFS path is {dbfs_data_path}")
 print(f"Database name is {database_name}")
+print(f"Username is {user_name}")
       
 #print("Local data path is {}".format(local_data_path))
 #print("DBFS path is {}".format(dbfs_data_path))

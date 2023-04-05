@@ -15,7 +15,7 @@
 -- COMMAND ----------
 
 -- MAGIC %md
--- MAGIC In cells 3 and 4 replace the YOUR_USER_NAME_HERE with your username.   Refer to 03.1 notebook cell #3 for created paths
+-- MAGIC In cells 3 and 4 replace the YOUR_USER_NAME_HERE with your username.   Refer to 03.1 notebook cell #3 for created paths and variables
 
 -- COMMAND ----------
 
