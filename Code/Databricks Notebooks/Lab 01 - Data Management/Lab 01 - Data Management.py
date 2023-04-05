@@ -25,8 +25,7 @@ import pandas as pd
 # MAGIC %md
 # MAGIC 
 # MAGIC ### Data flow diagram
-# MAGIC 
-# MAGIC ![](files/images/lakehousearchitecture.png)
+# MAGIC <img src="https://github.com/MicrosoftLIAD/classroomB2/blob/main/Code/Databricks%20Notebooks/images/lakehousearchitecture.png?raw=true" style="width: 650px; max-width: 100%; height: auto" />
 
 # COMMAND ----------
 
