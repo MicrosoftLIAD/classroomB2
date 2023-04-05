@@ -5,13 +5,23 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Make sure you change schema name in next cell to match schema you named when creating the pipeline
+# MAGIC ##Query Count of sales_orders_cleaned
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC Make sure you change schema name in next 2 cells to match schema you named when creating the pipeline
 
 # COMMAND ----------
 
 # MAGIC %sql 
-# MAGIC -- Check on how many rows already added
-# MAGIC select count(*) from myrjdbschema.sales_orders_cleaned;
+# MAGIC 
+# MAGIC select count(*) from rjsalesSchemaCarhartt.sales_orders_cleaned VERSION AS OF 0;
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC DESCRIBE HISTORY rjsalesSchemaCarhartt.sales_orders_cleaned;
 
 # COMMAND ----------
 
@@ -139,16 +149,6 @@ sales_df.write.json(f"{bronzePath}/sales_orders/sales{random_file_number}")
 
 display(dbutils.fs.ls(bronzePath + "/sales_orders"))
 
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC SELECT COUNT(*) FROM myrjdbschema.sales_orders_cleaned VERSION AS OF 5;
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC DESCRIBE HISTORY myrjdbschema.sales_orders_cleaned;
 
 # COMMAND ----------
 
