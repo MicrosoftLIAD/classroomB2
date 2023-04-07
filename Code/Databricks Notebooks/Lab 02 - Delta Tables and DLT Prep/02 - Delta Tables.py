@@ -17,17 +17,6 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### APJ Data Sources
-# MAGIC 
-# MAGIC For this exercise we will be starting to implement Lakehouse platform for our fictitious company, APJuice.
-# MAGIC 
-# MAGIC APJuice has been running for a while and we already had multiple data sources that could be used. To begin with, we have decided to focus on sales transactions that are uploaded from our store locations directly to cloud storage account. In addition to sales data we already had couple of dimension tables that we have exported to files and uploaded to cloud storage as well.
-# MAGIC 
-# MAGIC For the first part of the exercise we will be focusing on an export of Store Locations table that has been saved as `csv` file.
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC 
 # MAGIC ### Environment Setup
 # MAGIC 
@@ -93,28 +82,21 @@ print(query)
 # MAGIC 
 # MAGIC ### Create Delta Table
 # MAGIC 
-# MAGIC ***Load Store Locations data to Delta Table***
+# MAGIC ***Load employees data to a spark data frame then write that dataframe to a Delta Table***
 # MAGIC 
-# MAGIC In our example CRM export has been provided to us as a CSV file and uploaded to `dbfs_data_path` location. It could also be your S3 bucket, Azure Storage account or Google Cloud Storage. 
-# MAGIC 
-# MAGIC We will not be looking at how to set up access to files on the cloud environment in today's workshop.
-# MAGIC 
-# MAGIC 
-# MAGIC For our APJ Data Platform we know that we will not need to keep and manage history for this data so creating table can be a simple overwrite each time ETL runs.
-# MAGIC 
-# MAGIC 
-# MAGIC Let's start with simply reading CSV file into DataFrame
+# MAGIC Let's start with simply reading CSV file into a DataFrame
 
 # COMMAND ----------
 
-dataPath = f"{dbfs_data_path}/stores.csv"
+dataPath = "dbfs:/databricks-datasets/retail-org/company_employees/company_employees.csv"
 
 df = spark.read\
   .option("header", "true")\
   .option("delimiter", ",")\
   .option("quote", "\"") \
   .option("inferSchema", "true")\
-  .csv(dataPath)
+  .csv(dataPath)\
+  .limit(9)
 
 display(df)
 
@@ -128,13 +110,13 @@ display(df)
 
 # Creating a Temporary View will allow us to use SQL to interact with data
 
-df.createOrReplaceTempView("stores_csv_file")
+df.createOrReplaceTempView("employees_csv_file")
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC SELECT * from stores_csv_file
+# MAGIC SELECT * from employees_csv_file
 
 # COMMAND ----------
 
@@ -146,14 +128,14 @@ df.createOrReplaceTempView("stores_csv_file")
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DROP TABLE IF EXISTS stores;
+# MAGIC DROP TABLE IF EXISTS employees;
 # MAGIC 
-# MAGIC CREATE TABLE stores
+# MAGIC CREATE TABLE employees
 # MAGIC USING DELTA
 # MAGIC AS
-# MAGIC SELECT * FROM stores_csv_file;
+# MAGIC SELECT * FROM employees_csv_file;
 # MAGIC 
-# MAGIC SELECT * from stores;
+# MAGIC SELECT * from employees;
 
 # COMMAND ----------
 
@@ -176,13 +158,13 @@ df.createOrReplaceTempView("stores_csv_file")
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC DESCRIBE HISTORY stores;
+# MAGIC DESCRIBE HISTORY employees;
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DESCRIBE EXTENDED stores
+# MAGIC DESCRIBE EXTENDED employees;
 
 # COMMAND ----------
 
@@ -197,8 +179,8 @@ df.createOrReplaceTempView("stores_csv_file")
 
 # COMMAND ----------
 
-# DBTITLE 1,Notice the _delta_log/ folder unders stores.  Its contains the JSON log file info that tracks versions.
-dbutils.fs.ls( f"dbfs:/user/hive/warehouse/{DeltaDataSchema}.db/stores/" )
+# DBTITLE 1,Notice the _delta_log/ folder unders employees.  Its contains the JSON log file info that tracks versions.
+display(dbutils.fs.ls( f"dbfs:/user/hive/warehouse/{DeltaDataSchema}.db/employees/" ))
 
 
 # COMMAND ----------
@@ -212,7 +194,7 @@ dbutils.fs.ls( f"dbfs:/user/hive/warehouse/{DeltaDataSchema}.db/stores/" )
 # COMMAND ----------
 
 
-log_files_location = f"dbfs:/user/hive/warehouse/{DeltaDataSchema}.db/stores/_delta_log/"
+log_files_location = f"dbfs:/user/hive/warehouse/{DeltaDataSchema}.db/employees/_delta_log/"
 print(log_files_location)
 
 display(dbutils.fs.ls(log_files_location))
@@ -238,7 +220,7 @@ dbutils.fs.head(first_log_file_location)
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DESCRIBE HISTORY stores;
+# MAGIC DESCRIBE HISTORY employees;
 
 # COMMAND ----------
 
@@ -252,33 +234,33 @@ dbutils.fs.head(first_log_file_location)
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC alter table stores
-# MAGIC add column store_country string;
+# MAGIC alter table employees
+# MAGIC add column employee_title string;
 
 # COMMAND ----------
 
 # MAGIC %sql 
 # MAGIC 
-# MAGIC update stores
-# MAGIC set store_country = case when id in ('SYD01', 'MEL01', 'BNE02','CBR01','PER01') then 'AUS' when id in ('AKL01', 'AKL02', 'WLG01') then 'NZL' end
+# MAGIC update employees
+# MAGIC set employee_title = case when employee_id in (0,2) then 'MGR' else 'unknown' end
 
 # COMMAND ----------
 
 # MAGIC %sql 
-# MAGIC select store_country, id, name from stores
+# MAGIC select employee_id,employee_title from employees;
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC update stores
-# MAGIC set store_country = 'AUS'
-# MAGIC where id = 'MEL02'
+# MAGIC update employees
+# MAGIC set employee_title = 'CEO'
+# MAGIC where employee_id = 1
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC select store_country, count(id) as number_of_stores from stores group by store_country
+# MAGIC select employee_title, count(employee_id) as employee_count_by_title from employees group by employee_title
 
 # COMMAND ----------
 
@@ -293,7 +275,7 @@ dbutils.fs.head(first_log_file_location)
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DESCRIBE HISTORY stores
+# MAGIC DESCRIBE HISTORY employees
 
 # COMMAND ----------
 
@@ -317,20 +299,20 @@ display(dbutils.fs.ls(log_files_location))
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * from stores VERSION AS OF 2 where id = 'MEL02';
+# MAGIC select * from employees VERSION AS OF 2 where employee_title = 'MGR';
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * from stores VERSION AS OF 3
-# MAGIC where id = 'MEL02';
+# MAGIC select * from employees VERSION AS OF 3
+# MAGIC where employee_title = 'MGR';
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DESCRIBE HISTORY stores
+# MAGIC DESCRIBE HISTORY employees
 
 # COMMAND ----------
 
@@ -346,7 +328,7 @@ display(dbutils.fs.ls(log_files_location))
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC ALTER TABLE stores SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
+# MAGIC ALTER TABLE employees SET TBLPROPERTIES (delta.enableChangeDataFeed = true)
 
 # COMMAND ----------
 
@@ -358,7 +340,7 @@ display(dbutils.fs.ls(log_files_location))
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC describe history stores
+# MAGIC describe history employees
 
 # COMMAND ----------
 
@@ -374,14 +356,14 @@ display(dbutils.fs.ls(log_files_location))
 # MAGIC 
 # MAGIC -- simulate change of address for store AKL01 and removal of store BNE02
 # MAGIC 
-# MAGIC update stores
-# MAGIC set hq_address = 'Domestic Terminal, AKL'
-# MAGIC where id = 'AKL01';
+# MAGIC update employees
+# MAGIC set employee_title = 'Supervisor'
+# MAGIC where employee_title = 'MGR';
 # MAGIC 
-# MAGIC delete from stores
-# MAGIC where id = 'BNE02';
+# MAGIC delete from employees
+# MAGIC where employee_id = 0;
 # MAGIC 
-# MAGIC SELECT * FROM table_changes('stores', 4, 6) -- Note that we increment versions due to UPDATE statements above
+# MAGIC SELECT * FROM table_changes('employees', 5,6) -- Note that we increment versions due to UPDATE statements above
 
 # COMMAND ----------
 
@@ -418,25 +400,25 @@ display(dbutils.fs.ls(log_files_location))
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC drop table if exists stores_clone;
+# MAGIC drop table if exists employees_clone;
 # MAGIC 
-# MAGIC create table stores_clone DEEP CLONE stores VERSION AS OF 3 -- you can specify timestamp here instead of a version
+# MAGIC create table employees_clone DEEP CLONE employees VERSION AS OF 3 -- you can specify timestamp here instead of a version
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC describe history stores_clone;
+# MAGIC describe history employees_clone;
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC drop table if exists stores_clone_shallow;
+# MAGIC drop table if exists employees_clone_shallow;
 # MAGIC 
 # MAGIC -- Note that no files are copied
 # MAGIC 
-# MAGIC create table stores_clone_shallow SHALLOW CLONE stores
+# MAGIC create table employees_clone_shallow SHALLOW CLONE employees;
 
 # COMMAND ----------
 
@@ -451,52 +433,50 @@ display(dbutils.fs.ls(log_files_location))
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * from stores
+# MAGIC select * from employees
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DROP VIEW IF EXISTS v_stores_email_redacted;
+# MAGIC DROP VIEW IF EXISTS v_employee_name_redacted;
 # MAGIC 
-# MAGIC CREATE VIEW v_stores_email_redacted AS
+# MAGIC CREATE VIEW v_employee_name_redacted AS
 # MAGIC SELECT
-# MAGIC   id,
-# MAGIC   name,
+# MAGIC   employee_id,
 # MAGIC   CASE WHEN
-# MAGIC --    NOT is_member('admins') THEN email
-# MAGIC     is_member('admins') THEN email
+# MAGIC     --NOT is_member('admins') THEN employee_name
+# MAGIC     is_member('admins') THEN employee_name
 # MAGIC     ELSE 'REDACTED'
-# MAGIC   END AS email,
-# MAGIC   city,
-# MAGIC   hq_address,
-# MAGIC   phone_number,
-# MAGIC   store_country
-# MAGIC FROM stores;
+# MAGIC   END AS employee_name,
+# MAGIC   department,
+# MAGIC   region,
+# MAGIC   employee_title
+# MAGIC FROM employees;
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * from v_stores_email_redacted;
+# MAGIC select * from v_employee_name_redacted;
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC DROP VIEW IF EXISTS v_stores_country_limited;
+# MAGIC DROP VIEW IF EXISTS v_employees_limited;
 # MAGIC 
-# MAGIC CREATE VIEW v_stores_country_limited AS
+# MAGIC CREATE VIEW v_employees_limited AS
 # MAGIC SELECT *
-# MAGIC FROM stores
+# MAGIC FROM employees
 # MAGIC WHERE 
-# MAGIC   (is_member('admins') OR id = 'SYD01');
+# MAGIC   (employee_title = 'unknown');
 
 # COMMAND ----------
 
 # MAGIC %sql
 # MAGIC 
-# MAGIC select * from v_stores_country_limited;
+# MAGIC select * from v_employees_limited;
 
 # COMMAND ----------
 

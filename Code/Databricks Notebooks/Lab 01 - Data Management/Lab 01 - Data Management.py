@@ -63,8 +63,8 @@ print(f"Database name is {database_name}")
 # COMMAND ----------
 
 # DBTITLE 1,Update these variables
-studentName = 'dliad'
-storageName = 'stadlstibrown'
+studentName = 'richjohn'
+storageName = 'stgliadadls'
 
 
 # COMMAND ----------
@@ -96,7 +96,7 @@ dbutils.fs.ls(f"abfss://{studentName}@{storageName}.dfs.core.windows.net/silver"
 # COMMAND ----------
 
 # List gold files
-dbutils.fs.ls(f"abfss://{studentName}@{storageName}.dfs.core.windows.net/gold/flights/flightdata")
+dbutils.fs.ls(f"abfss://{studentName}@{storageName}.dfs.core.windows.net/gold")
 
 # COMMAND ----------
 
@@ -483,7 +483,3 @@ files = dbutils.fs.ls(f"{goldPath}/flights/flightdata/")
 
 for file in files:
     print(file.name)
-
-# COMMAND ----------
-
-

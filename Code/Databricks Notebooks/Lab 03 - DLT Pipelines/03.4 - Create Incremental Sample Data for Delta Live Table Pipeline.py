@@ -16,12 +16,12 @@
 
 # MAGIC %sql 
 # MAGIC 
-# MAGIC select count(*) from rjsalesSchemaCarhartt.sales_orders_cleaned VERSION AS OF 0;
+# MAGIC select count(*) from richjohnPipelineSchema.sales_orders_cleaned VERSION AS OF  ;
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC DESCRIBE HISTORY rjsalesSchemaCarhartt.sales_orders_cleaned;
+# MAGIC DESCRIBE HISTORY richjohnPipelineSchema.sales_orders_cleaned;
 
 # COMMAND ----------
 
@@ -112,7 +112,7 @@ sales_df.createOrReplaceTempView("sampledata")
 
 # MAGIC %md
 # MAGIC ## Write sample incremental Data to Bronze Sales folde
-# MAGIC Repeat cells 16 through 17 to add new files to the bronze sales folder and watch sales_orders_cleaned table grow from the DLT pipeline
+# MAGIC Repeat cells 18 through 19 to add new files to the bronze sales folder and watch sales_orders_cleaned table grow from the DLT pipeline
 # MAGIC 
 # MAGIC (Note, in this scenario we're appending to the sales_orders_cleaned table and NOT doing a merge or upsert)
 
