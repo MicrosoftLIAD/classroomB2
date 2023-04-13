@@ -16,12 +16,15 @@
 
 # MAGIC %sql 
 # MAGIC 
-# MAGIC select count(*) from richjohnPipelineSchema.sales_orders_cleaned VERSION AS OF  ;
+# MAGIC SELECT count(*) FROM <PUT YOUR SCHEMA NAME HEARE FROM YOUR DELTA LIVE TABLE PIPELINE YOU CREATED>.sales_orders_cleaned;
+# MAGIC --SELECT count(*) FROM salesschemapipeline04132023.sales_orders_cleaned;
 
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC DESCRIBE HISTORY richjohnPipelineSchema.sales_orders_cleaned;
+# MAGIC 
+# MAGIC DESCRIBE HISTORY <PUT YOUR SCHEMA NAME HEARE FROM YOUR DELTA LIVE TABLE PIPELINE YOU CREATED>.sales_orders_cleaned;
+# MAGIC --DESCRIBE HISTORY salesschemapipeline04132023.sales_orders_cleaned;
 
 # COMMAND ----------
 

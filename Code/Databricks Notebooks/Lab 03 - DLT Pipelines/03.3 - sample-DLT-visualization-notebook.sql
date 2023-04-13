@@ -1,6 +1,9 @@
 -- Databricks notebook source
--- this will be a database/schema generated for an individual pipeline
-use dlt_onboarding_1678976061961w7wdx60m;
+-- this will be a database/schema you added to your Delta live table pipeline under settings.
+
+--USE <PUT YOUR DATABASE SCHEMA NAME HERE FROM PIPELINE SETTINGS>;
+
+USE salesschemapipeline04132023;
 
 -- COMMAND ----------
 

@@ -49,6 +49,16 @@ print("Database name is {}".format(database_name))
 
 # COMMAND ----------
 
+#Delete the old schema if it exists and cascade (drop) all tables within that schema
+DeltaDataSchema = f"{database_name}_delta"
+
+query = f"DROP SCHEMA IF EXISTS {DeltaDataSchema} CASCADE"
+print( query )
+
+spark.sql( query)
+
+# COMMAND ----------
+
 DeltaDataSchema = f"{database_name}_delta"
 
 query = f"CREATE SCHEMA IF NOT EXISTS {DeltaDataSchema}"
